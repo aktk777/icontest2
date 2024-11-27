@@ -14,9 +14,6 @@
             background-color: #000;
             color: #fff;
             font-family: "Helvetica Neue", Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             min-height: 100vh;
             width: 100%;
             overflow-x: hidden;
@@ -54,6 +51,36 @@
             padding: 20px;
             width: 100%;
         }
+        /* アプリコンテナ */
+        #app-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            width: 100%;
+            min-height: 100vh;
+        }
+        #app-content {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+        }
+        /* 指示文 */
+        #instruction {
+            width: 400px; /* 固定幅を設定 */
+            margin: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #f8f8f8;
+            text-align: center;
+            word-break: keep-all;
+            line-height: 1.5;
+            flex-shrink: 0; /* 追加：縮小しないように設定 */
+        }
         /* スマホフレーム */
         .smartphone-frame {
             position: relative;
@@ -67,6 +94,7 @@
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
             display: flex;
             flex-direction: column;
+            margin: 0 auto;
         }
         /* メイン画像エリア */
         .main-image-area {
@@ -165,14 +193,6 @@
             font-size: 14px;
             font-weight: bold;
             white-space: nowrap;
-        }
-        /* テキスト */
-        #instruction {
-            margin: 20px;
-            font-size: 24px;
-            font-weight: bold;
-            color: #f8f8f8;
-            text-align: center;
         }
         /* 同意書内容のスタイル */
         #consent-container {
@@ -292,6 +312,18 @@
         #ending-screen h2 {
             color: #fff;
         }
+        /* メディアクエリ */
+        @media (max-width: 800px) {
+            #app-content {
+                flex-direction: column;
+            }
+            #instruction {
+                width: 100%; /* 幅を100%に */
+            }
+            .smartphone-frame {
+                margin-top: 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -366,38 +398,43 @@
         <button id="start-main-button" class="taskchange-button">本番開始</button>
     </div>
     <div id="app-container">
-        <p id="instruction"></p>
-        <div class="smartphone-frame">
-            <div class="main-image-area">
-                <img src="icons/sample_image.jpg" alt="Editing Image" />
-                <div class="top-bar">
-                    <button id="back-button">&#8592;</button>
-                    <h1></h1>
-                    <button id="save-button">保存</button>
-                </div>
-                <!-- 中央のツールバーを追加 -->
-                <div class="middle-toolbar">
-                    <div class="toolbar-button" data-icon-id="copy">
-                        <img src="icons/copy.png" alt="copy" />
-                        <span></span>
+        <div id="app-content">
+            <div id="instruction">
+                <p>操作の目標：</p>
+                <p id="instruction-text"></p>
+            </div>
+            <div class="smartphone-frame">
+                <div class="main-image-area">
+                    <img src="icons/sample_image.jpg" alt="Editing Image" />
+                    <div class="top-bar">
+                        <button id="back-button">&#8592;</button>
+                        <h1></h1>
+                        <button id="save-button">保存</button>
                     </div>
-                    <div class="toolbar-button" data-icon-id="delete">
-                        <img src="icons/delete.png" alt="delete" />
-                        <span></span>
+                    <!-- 中央のツールバーを追加 -->
+                    <div class="middle-toolbar">
+                        <div class="toolbar-button" data-icon-id="copy">
+                            <img src="icons/copy.png" alt="copy" />
+                            <span></span>
+                        </div>
+                        <div class="toolbar-button" data-icon-id="delete">
+                            <img src="icons/delete.png" alt="delete" />
+                            <span></span>
+                        </div>
                     </div>
-                </div>
-                <div class="bottom-toolbar">
-                    <div class="toolbar-button" data-icon-id="replace">
-                        <img src="icons/replace.jpg" alt="replace" />
-                    </div>
-                    <div class="toolbar-button" data-icon-id="color">
-                        <img src="icons/color.jpg" alt="color" />
-                    </div>
-                    <div class="toolbar-button" data-icon-id="style">
-                        <img src="icons/style.jpg" alt="style" />
-                    </div>
-                    <div class="toolbar-button" data-icon-id="effect">
-                        <img src="icons/effect.jpg" alt="effect" />
+                    <div class="bottom-toolbar">
+                        <div class="toolbar-button" data-icon-id="replace">
+                            <img src="icons/replace.jpg" alt="replace" />
+                        </div>
+                        <div class="toolbar-button" data-icon-id="color">
+                            <img src="icons/color.jpg" alt="color" />
+                        </div>
+                        <div class="toolbar-button" data-icon-id="style">
+                            <img src="icons/style.jpg" alt="style" />
+                        </div>
+                        <div class="toolbar-button" data-icon-id="effect">
+                            <img src="icons/effect.jpg" alt="effect" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -480,6 +517,7 @@
             const appContainer = document.getElementById("app-container");
             const breakScreen = document.getElementById("break-screen");
             const instruction = document.getElementById("instruction");
+            const instructionText = document.getElementById("instruction-text");
 
             const toolbarButtons = document.querySelectorAll(".toolbar-button");
 
@@ -682,7 +720,7 @@
                     taskIndex.main++;
                 }
 
-                instruction.textContent = "操作の目標：" + targetTask.instruction;
+                instructionText.textContent = targetTask.instruction;
                 startTime = new Date();
 
                 // アイコンのクリックイベントを設定
