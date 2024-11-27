@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <title>実験タスク</title>
+    <style>
+        /* リセットと基本スタイル */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        /* 共通ボタンスタイル */
+        button {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            font: inherit;
+            outline: inherit;
+        }
+        /* 画面 */
+        #start-screen,
+        #practice-intro-screen,
+        #app-container,
+        #break-screen,
+        #main-intro-screen,
+        #questionnaire-screen,
+        #ending-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            width: 100%;
+            min-height: 100vh;
+        }
+        #consent-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            width: 100%;
+        }
+        /* スマホフレーム */
+        .smartphone-frame {
+            position: relative;
+            width: 90%;
+            max-width: 375px;
+            aspect-ratio: 375 / 812;
+            background-color: #000;
+            border: 8px solid #333;
+            border-radius: 40px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+        /* メイン画像エリア */
+        .main-image-area {
+            position: relative;
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+        }
+        .main-image-area img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        /* トップバー */
+        .top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #f8f8f8;
+            z-index: 2;
+        }
+        .top-bar h1 {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .top-bar button {
+            color: #020202;
+            font-size: 16px;
+        }
+        /* 中央のツールバー */
+        .middle-toolbar {
+            position: absolute;
+            bottom: 320px;
+            left: 80%;
+            transform: translateX(-50%);
+            display: flex;
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-radius: 10px;
+            z-index: 2;
+        }
+        .middle-toolbar .toolbar-button {
+            margin: 0 10px;
+        }
+        /* ボトムツールバー */
+        .bottom-toolbar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px;
+            background-color: #f8f8f8;
+            z-index: 2;
+        }
+        .toolbar-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #020202;
+            font-size: 12px;
+            text-decoration: none;
+            cursor: pointer;
+            position: relative;
+        }
+        .toolbar-button img {
+            width: 32px;
+            height: 32px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            cursor: pointer;
+            margin-bottom: 5px;
+        }
+        /* 強調表示用のスタイル */
+        .highlight {
+            border: 2px solid rgb(230, 41, 41);
+            border-radius: 5px;
+        }
+        .select-here-label {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgb(240, 240, 30);
+            color: #020202;
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        /* テキスト */
+        #instruction {
+            margin: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #f8f8f8;
+            text-align: center;
+        }
+        /* 同意書内容のスタイル */
+        #consent-container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .consent-content {
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-size: 16px;
+            color: #fff;
+        }
+        .consent-content h3 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .consent-content p {
+            margin-bottom: 20px;
+        }
+        /* フォーム入力 */
+        #consent-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        /* ボタン */
+        .primary-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+        }
+        .primary-button:hover {
+            background-color: #0056b3;
+        }
+        .taskchange-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .taskchange-button:hover {
+            background-color: #0056b3;
+        }
+        /* アンケートフォーム */
+        #questionnaire-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        #questionnaire-form .form-group {
+            margin-bottom: 20px;
+        }
+        #questionnaire-form label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        #questionnaire-form textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        #questionnaire-form button {
+            width: 100%;
+            padding: 10px;
+        }
+        /* ラジオグループ */
+        .radio-group {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .radio-group label {
+            flex: 1;
+            text-align: center;
+            font-size: 14px;
+            margin: 0;
+            color: #fff;
+        }
+        .radio-group input[type="radio"] {
+            margin-bottom: 5px;
+        }
+        /* 終了画面 */
+        #ending-screen h2 {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <!-- 実験同意書ページ -->
+    <div id="consent-screen" style="display: flex">
+        <div id="consent-container">
+            <div class="consent-content">
+                <p>
+                    この度は本実験へのご協力ありがとうございます。以下の内容をご確認いただき、同意いただける場合は、必要事項をご記入の上「同意して実験開始」を選択し実験を開始してください。
+                </p>
+                <h3>1. 実験の目的</h3>
+                <p>アイコンの推測容易性の評価</p>
+                <h3>2. 実験の概要</h3>
+                <p>
+                    パソコン画面上で、操作の目標を達成するために選択するべき部分をできるだけ早く正確にクリックしていただきます。タスク後に、アイコンの分かりやすさ、複雑さ、美的好ましさに関する簡単な質問にお答えいただきます。最後に、アイコンの探索方法について自由記述でお伺いします。
+                </p>
+                <h3>3. 所要時間</h3>
+                <p>約20分程度です。</p>
+                <h3>4. 参加にあたっての注意事項</h3>
+                <p>
+                    参加は完全に任意であり、途中で中止することも可能です。その場合でも不利益を被ることはありません。環境：安定したインターネット接続とPCをご用意ください。タスクに集中できる環境で実験を行ってください。
+                </p>
+                <h3>5. 個人情報の取り扱い</h3>
+                <p>収集したデータは匿名化し、研究目的以外には使用いたしません。</p>
+                <h3>6. お問い合わせ先</h3>
+                <p>
+                    担当者：明治大学大学院 渡邊研究室 赤塚翔太<br />
+                    メールアドレス：cs232002@meiji.ac.jp
+                </p>
+            </div>
+            <form id="consent-form">
+                <div class="form-group">
+                    <label for="participant-name">氏名:</label>
+                    <input type="text" id="participant-name" required />
+                </div>
+                <div class="form-group">
+                    <label for="participant-age">年齢:</label>
+                    <input type="number" id="participant-age" min="0" required />
+                </div>
+                <div class="form-group">
+                    <label for="participant-gender">性別:</label>
+                    <select id="participant-gender" required>
+                        <option value="">選択してください</option>
+                        <option value="男性">男性</option>
+                        <option value="女性">女性</option>
+                        <option value="その他">その他</option>
+                        <option value="回答しない">回答しない</option>
+                    </select>
+                </div>
+                <button type="button" id="consent-button" class="primary-button">
+                    同意して実験開始
+                </button>
+            </form>
+        </div>
+    </div>
+    <!-- 開始画面 -->
+    <div id="start-screen">
+        <button id="start-button" class="taskchange-button">開始</button>
+    </div>
+    <div id="practice-intro-screen">
+        <p>
+            これから練習試行を行います。<br />操作の目標を達成するために選択するべき部分をクリックしてください。練習では正解が示されます。<br />準備ができたら「練習開始」を押してください。
+        </p>
+        <button id="start-practice-button" class="taskchange-button">
+            練習開始
+        </button>
+    </div>
+    <div id="main-intro-screen">
+        <p>
+            これから本番を行います。<br />操作の目標を達成するために選択するべき部分をクリックしてください。<br />準備ができたら「本番開始」を押してください。
+        </p>
+        <button id="start-main-button" class="taskchange-button">本番開始</button>
+    </div>
+    <div id="app-container">
+        <p id="instruction"></p>
+        <div class="smartphone-frame">
+            <div class="main-image-area">
+                <img src="icons/sample_image.jpg" alt="Editing Image" />
+                <div class="top-bar">
+                    <button id="back-button">&#8592;</button>
+                    <h1></h1>
+                    <button id="save-button">保存</button>
+                </div>
+                <!-- 中央のツールバーを追加 -->
+                <div class="middle-toolbar">
+                    <div class="toolbar-button" data-icon-id="copy">
+                        <img src="icons/copy.png" alt="copy" />
+                        <span></span>
+                    </div>
+                    <div class="toolbar-button" data-icon-id="delete">
+                        <img src="icons/delete.png" alt="delete" />
+                        <span></span>
+                    </div>
+                </div>
+                <div class="bottom-toolbar">
+                    <div class="toolbar-button" data-icon-id="replace">
+                        <img src="icons/replace.jpg" alt="replace" />
+                    </div>
+                    <div class="toolbar-button" data-icon-id="color">
+                        <img src="icons/color.jpg" alt="color" />
+                    </div>
+                    <div class="toolbar-button" data-icon-id="style">
+                        <img src="icons/style.jpg" alt="style" />
+                    </div>
+                    <div class="toolbar-button" data-icon-id="effect">
+                        <img src="icons/effect.jpg" alt="effect" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="break-screen">
+        <p>休憩時間です。準備ができたら「続ける」を押してください。</p>
+        <button id="continue-button" class="taskchange-button">続ける</button>
+    </div>
+    <!-- アンケート画面 -->
+    <div id="questionnaire-screen">
+        <h2>アンケートにお答えください</h2>
+        <form id="questionnaire-form">
+            <div class="form-group">
+                <label>これらのアイコンはどのくらい分かりやすいですか？<br />（1:とても分かりにくい～7:とても分かりやすい）</label>
+                <div class="radio-group" id="understandability">
+                    <label><input type="radio" name="understandability" value="1" required />1</label>
+                    <label><input type="radio" name="understandability" value="2" />2</label>
+                    <label><input type="radio" name="understandability" value="3" />3</label>
+                    <label><input type="radio" name="understandability" value="4" />4</label>
+                    <label><input type="radio" name="understandability" value="5" />5</label>
+                    <label><input type="radio" name="understandability" value="6" />6</label>
+                    <label><input type="radio" name="understandability" value="7" />7</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>これらのアイコンはどのくらい複雑ですか？<br />（1:とても単純～7:とても複雑）</label>
+                <div class="radio-group" id="complexity">
+                    <label><input type="radio" name="complexity" value="1" required />1</label>
+                    <label><input type="radio" name="complexity" value="2" />2</label>
+                    <label><input type="radio" name="complexity" value="3" />3</label>
+                    <label><input type="radio" name="complexity" value="4" />4</label>
+                    <label><input type="radio" name="complexity" value="5" />5</label>
+                    <label><input type="radio" name="complexity" value="6" />6</label>
+                    <label><input type="radio" name="complexity" value="7" />7</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>これらのアイコンはどのくらい美的に好ましいですか？<br />（1:美的に好ましくない～7:美的に好ましい）</label>
+                <div class="radio-group" id="aesthetic">
+                    <label><input type="radio" name="aesthetic" value="1" required />1</label>
+                    <label><input type="radio" name="aesthetic" value="2" />2</label>
+                    <label><input type="radio" name="aesthetic" value="3" />3</label>
+                    <label><input type="radio" name="aesthetic" value="4" />4</label>
+                    <label><input type="radio" name="aesthetic" value="5" />5</label>
+                    <label><input type="radio" name="aesthetic" value="6" />6</label>
+                    <label><input type="radio" name="aesthetic" value="7" />7</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>タスクを振り返って、どのようにアイコンを探索しましたか？（自由記述）<br />（アイコンを見つける際にどのような視覚的手がかりや特徴を利用したか,<br />他のアイコンとの区別をつけるためにどのような工夫をしたかなど）</label>
+                <textarea id="strategy" required></textarea>
+            </div>
+            <button type="button" id="submit-questionnaire-button" class="primary-button">
+                送信
+            </button>
+        </form>
+    </div>
+    <!-- 終了画面 -->
+    <div id="ending-screen">
+        <h2>実験終了です。ブラウザーを閉じてください。</h2>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const END_POINT = "https://script.google.com/macros/s/AKfycbxQXRajYbpZbiWMXQVu01Jeusvd1uM_-akT27EHeofncLV28CYXIsUOELSescqfPvfg5w/exec"; // WebアプリのURLを設定
+            const SHEET_NO = 1;
+            const consentScreen = document.getElementById("consent-screen");
+            const participantNameInput = document.getElementById("participant-name");
+            const participantAgeInput = document.getElementById("participant-age");
+            const participantGenderSelect = document.getElementById("participant-gender");
+            const consentButton = document.getElementById("consent-button");
+
+            const startButton = document.getElementById("start-button");
+            const startPracticeButton = document.getElementById("start-practice-button");
+            const startMainButton = document.getElementById("start-main-button");
+            const continueButton = document.getElementById("continue-button");
+            const startScreen = document.getElementById("start-screen");
+            const practiceIntroScreen = document.getElementById("practice-intro-screen");
+            const mainIntroScreen = document.getElementById("main-intro-screen");
+            const appContainer = document.getElementById("app-container");
+            const breakScreen = document.getElementById("break-screen");
+            const instruction = document.getElementById("instruction");
+
+            const toolbarButtons = document.querySelectorAll(".toolbar-button");
+
+            const questionnaireScreen = document.getElementById("questionnaire-screen");
+            const submitQuestionnaireButton = document.getElementById("submit-questionnaire-button");
+            const understandabilityInputs = document.getElementsByName("understandability");
+            const complexityInputs = document.getElementsByName("complexity");
+            const aestheticInputs = document.getElementsByName("aesthetic");
+            const strategyInput = document.getElementById("strategy");
+
+            const endingScreen = document.getElementById("ending-screen");
+
+            const tasks = [
+                { instruction: "画像を明るくしてください", correctIconId: "effect" },
+                { instruction: "選択した画像を複製してください", correctIconId: "copy" },
+                { instruction: "画像のスタイルを変更してください", correctIconId: "style" },
+                { instruction: "画像の色調を変更してください", correctIconId: "color" },
+                { instruction: "選択した画像を削除してください", correctIconId: "delete" },
+                { instruction: "画像を置き換えてください", correctIconId: "replace" },
+            ];
+
+            let trialCount = 0;
+            let trialCountInGroup = 0;
+            let currentConditionIndex = 0;
+            let startTime, targetTask, participantId, order;
+            let participantNumber;
+            let practiceMode = true;
+            const practiceTrialsPerGroup = tasks.length; // 各アイコンを1回ずつ練習
+            let practiceTrialsInGroup = 0;
+
+            const iconSets = {
+                1: {
+                    effect: "icons/effect.jpg",
+                    copy: "icons/copy.jpg",
+                    style: "icons/style.jpg",
+                    color: "icons/color.jpg",
+                    delete: "icons/delete.jpg",
+                    replace: "icons/replace.jpg",
+                },
+                2: {
+                    effect: "icons/effect_ai.jpg",
+                    copy: "icons/copy_ai.jpg",
+                    style: "icons/style_ai.jpg",
+                    color: "icons/color_ai.jpg",
+                    delete: "icons/delete_ai.jpg",
+                    replace: "icons/replace_ai.jpg",
+                },
+            };
+
+            let orderedConditions = [];
+            let taskSequences = {
+                practice: [],
+                main: [],
+            };
+            let taskIndex = {
+                practice: 0,
+                main: 0,
+            };
+
+            consentButton.addEventListener("click", submitConsent);
+            startButton.addEventListener("click", showPracticeIntro);
+            startPracticeButton.addEventListener("click", startPractice);
+            startMainButton.addEventListener("click", startMain);
+            continueButton.addEventListener("click", continueGame);
+            submitQuestionnaireButton.addEventListener("click", submitQuestionnaire);
+
+            function generateParticipantId(number) {
+                return `P${String(number).padStart(4, "0")}`;
+            }
+
+            function submitConsent() {
+                const name = participantNameInput.value.trim();
+                const age = participantAgeInput.value;
+                const gender = participantGenderSelect.value;
+
+                if (!name || !age || !gender) {
+                    alert("全ての項目に入力してください。");
+                    return;
+                }
+
+                const consentData = {
+                    sheetNo: 3,
+                    data: [
+                        {
+                            name: name,
+                            age: age,
+                            gender: gender,
+                        },
+                    ],
+                };
+
+                // サーバーに同意書データを送信し、参加者番号を取得
+                fetch(END_POINT, {
+                    method: "POST",
+                    body: JSON.stringify(consentData),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data && data.participantNumber) {
+                            participantNumber = data.participantNumber;
+                            participantId = generateParticipantId(participantNumber);
+                            assignConditionOrder(participantNumber);
+                            consentScreen.style.display = "none";
+                            startScreen.style.display = "flex";
+                        } else {
+                            alert("参加者番号の取得に失敗しました。");
+                        }
+                    })
+                    .catch((error) => console.error("Error!", error.message));
+            }
+
+            function assignConditionOrder(participantNumber) {
+                if (participantNumber % 2 === 0) {
+                    orderedConditions = [1, 2];
+                    order = 0;
+                } else {
+                    orderedConditions = [2, 1];
+                    order = 1;
+                }
+            }
+
+            function showPracticeIntro() {
+                startScreen.style.display = "none";
+                practiceIntroScreen.style.display = "flex";
+                trialCount = 0;
+                trialCountInGroup = 0;
+                currentConditionIndex = 0;
+                practiceMode = true;
+                practiceTrialsInGroup = 0;
+            }
+
+            function startPractice() {
+                practiceIntroScreen.style.display = "none";
+                appContainer.style.display = "flex";
+                practiceTrialsInGroup = 0;
+                setupIconsForCondition();
+                setupTask();
+            }
+
+            function showMainIntro() {
+                appContainer.style.display = "none";
+                mainIntroScreen.style.display = "flex";
+            }
+
+            function startMain() {
+                mainIntroScreen.style.display = "none";
+                appContainer.style.display = "flex";
+                trialCountInGroup = 0;
+                practiceMode = false;
+                setupIconsForCondition();
+                setupTask();
+            }
+
+            function continueGame() {
+                breakScreen.style.display = "none";
+                practiceIntroScreen.style.display = "flex";
+                practiceMode = true;
+                practiceTrialsInGroup = 0;
+            }
+
+            function setupIconsForCondition() {
+                const currentCondition = orderedConditions[currentConditionIndex];
+                const iconSet = iconSets[currentCondition];
+                toolbarButtons.forEach((button) => {
+                    const iconId = button.dataset.iconId;
+                    const iconUrl = iconSet[iconId];
+                    const img = button.querySelector("img");
+                    if (img && iconUrl) {
+                        img.src = iconUrl;
+                    }
+                });
+            }
+
+            function setupTask() {
+                const trialsPerGroup = tasks.length;
+
+                if (practiceMode && practiceTrialsInGroup >= practiceTrialsPerGroup) {
+                    showMainIntro();
+                    return;
+                }
+
+                if (!practiceMode && trialCountInGroup >= trialsPerGroup) {
+                    showQuestionnaire();
+                    return;
+                }
+
+                if (practiceMode) {
+                    if (practiceTrialsInGroup % tasks.length === 0) {
+                        taskSequences.practice = [...tasks].sort(() => Math.random() - 0.5);
+                        taskIndex.practice = 0;
+                    }
+                    targetTask = taskSequences.practice[taskIndex.practice];
+                    taskIndex.practice++;
+                } else {
+                    if (trialCountInGroup % tasks.length === 0) {
+                        taskSequences.main = [...tasks].sort(() => Math.random() - 0.5);
+                        taskIndex.main = 0;
+                    }
+                    targetTask = taskSequences.main[taskIndex.main];
+                    taskIndex.main++;
+                }
+
+                instruction.textContent = "操作の目標：" + targetTask.instruction;
+                startTime = new Date();
+
+                // アイコンのクリックイベントを設定
+                toolbarButtons.forEach((button) => {
+                    button.removeEventListener("click", handleIconClick);
+                    button.addEventListener("click", handleIconClick);
+                });
+
+                // 強調表示のリセット
+                toolbarButtons.forEach((button) => {
+                    button.classList.remove("highlight");
+                    const label = button.querySelector(".select-here-label");
+                    if (label) {
+                        button.removeChild(label);
+                    }
+                });
+
+                if (practiceMode) {
+                    const correctIconButton = document.querySelector(`.toolbar-button[data-icon-id="${targetTask.correctIconId}"]`);
+                    if (correctIconButton) {
+                        correctIconButton.classList.add("highlight");
+                        let label = document.createElement("div");
+                        label.className = "select-here-label";
+                        label.textContent = "ここを選択";
+                        correctIconButton.appendChild(label);
+                    }
+                }
+            }
+
+            function handleIconClick(event) {
+                const endTime = new Date();
+                const timeTaken = (endTime - startTime) / 1000;
+                const clickedIconId = event.currentTarget.dataset.iconId;
+                const correct = clickedIconId === targetTask.correctIconId;
+
+                if (practiceMode) {
+                    practiceTrialsInGroup++;
+                    setupTask();
+                } else {
+                    const resultData = {
+                        sheetNo: SHEET_NO,
+                        data: [
+                            {
+                                participantId: participantId,
+                                trial: trialCount + 1,
+                                instruction: targetTask.instruction,
+                                condition: orderedConditions[currentConditionIndex],
+                                correctness: correct ? "correct" : "incorrect",
+                                reactionTime: timeTaken,
+                            },
+                        ],
+                    };
+                    sendResultToGoogleSheets(resultData);
+                    trialCountInGroup++;
+                    trialCount++;
+                    setupTask();
+                }
+            }
+
+            function sendResultToGoogleSheets(data) {
+                fetch(END_POINT, {
+                    method: "POST",
+                    body: JSON.stringify(data),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        console.log("Success!", data);
+                    })
+                    .catch((error) => console.error("Error!", error.message));
+            }
+
+            function showQuestionnaire() {
+                appContainer.style.display = "none";
+                questionnaireScreen.style.display = "flex";
+            }
+
+            function submitQuestionnaire() {
+                const understandability = getRadioValue(understandabilityInputs);
+                const complexity = getRadioValue(complexityInputs);
+                const aesthetic = getRadioValue(aestheticInputs);
+                const strategy = strategyInput.value.trim();
+
+                if (!understandability || !complexity || !aesthetic || !strategy) {
+                    alert("全ての質問にお答えください。");
+                    return;
+                }
+
+                const questionnaireData = {
+                    sheetNo: 2,
+                    data: [
+                        {
+                            participantId: participantId,
+                            condition: orderedConditions[currentConditionIndex],
+                            understandability: understandability,
+                            complexity: complexity,
+                            aesthetic: aesthetic,
+                            strategy: strategy,
+                        },
+                    ],
+                };
+
+                sendResultToGoogleSheets(questionnaireData);
+
+                clearRadioSelection(understandabilityInputs);
+                clearRadioSelection(complexityInputs);
+                clearRadioSelection(aestheticInputs);
+                strategyInput.value = "";
+
+                questionnaireScreen.style.display = "none";
+
+                if (currentConditionIndex < orderedConditions.length - 1) {
+                    currentConditionIndex++;
+                    breakScreen.style.display = "flex"; // 休憩画面を表示
+                } else {
+                    endingScreen.style.display = "flex";
+                }
+            }
+
+            function getRadioValue(radioNodeList) {
+                for (let i = 0; i < radioNodeList.length; i++) {
+                    if (radioNodeList[i].checked) {
+                        return radioNodeList[i].value;
+                    }
+                }
+                return null;
+            }
+
+            function clearRadioSelection(radioNodeList) {
+                for (let i = 0; i < radioNodeList.length; i++) {
+                    radioNodeList[i].checked = false;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
